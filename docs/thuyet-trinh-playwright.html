@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thuyết trình Playwright — Sport Shop</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --slide: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --ok: #166534;
+      --ok-bg: #dcfce7;
+      --warn: #9a3412;
+      --warn-bg: #ffedd5;
+      --code: #0b1220;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); font-family: "Segoe UI", system-ui, sans-serif; color: var(--ink); }
+    .stage { height: 100%; display: grid; grid-template-rows: 1fr auto; }
+    .slide {
+      display: none;
+      background: var(--slide);
+      margin: 24px auto 0;
+      width: min(1120px, calc(100% - 32px));
+      min-height: calc(100vh - 96px);
+      padding: 48px 56px 40px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .slide.active { display: block; }
+    .kicker { color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
+    h1 { margin: 0 0 16px; font-size: 40px; line-height: 1.15; }
+    h2 { margin: 0 0 18px; font-size: 32px; line-height: 1.2; }
+    p, li { font-size: 20px; line-height: 1.45; color: var(--ink); }
+    .muted { color: var(--muted); }
+    .lead { font-size: 22px; max-width: 46ch; }
+    ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 8px; }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: #fff; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p, .card li { font-size: 16px; margin: 0; }
+    .stat { background: var(--accent-soft); border-color: #bfdbfe; }
+    .stat b { display: block; font-size: 28px; color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 16px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+    pre {
+      background: var(--code);
+      color: #e2e8f0;
+      padding: 16px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.45;
+      overflow: auto;
+      margin: 0;
+    }
+    code { font-family: Consolas, "Cascadia Mono", monospace; }
+    .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .pill { background: var(--accent-soft); color: var(--accent); border: 1px solid #bfdbfe; border-radius: 999px; padding: 8px 14px; font-size: 15px; font-weight: 600; }
+    .arrow { color: #94a3b8; font-weight: 700; }
+    .note { margin-top: 22px; padding: 14px 16px; background: #f8fafc; border-left: 4px solid var(--accent); color: var(--muted); font-size: 16px; }
+    .ok { background: var(--ok-bg); color: var(--ok); font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+    .fail { background: var(--warn-bg); color: var(--warn); font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+    .bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 20px 16px; color: #cbd5e1; font-size: 13px;
+    }
+    .bar button {
+      background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 8px;
+      padding: 8px 12px; cursor: pointer; font-size: 13px;
+    }
+    .title-slide { display: flex; flex-direction: column; justify-content: center; min-height: calc(100vh - 96px); }
+    .title-slide h1 { font-size: 46px; max-width: 16ch; }
+    @media (max-width: 900px) {
+      .slide { padding: 28px 22px; min-height: calc(100vh - 88px); }
+      h1 { font-size: 30px; } h2 { font-size: 24px; } p, li { font-size: 17px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .bar { display: none; }
+      .slide { display: block; margin: 0 0 24px; width: auto; min-height: auto; page-break-after: always; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div id="slides">
+
+      <section class="slide title-slide">
+        <p class="kicker">Kiểm thử tự động · Sport Shop</p>
+        <h1>Playwright cho kiểm thử giao diện cửa hàng Sport Shop</h1>
+        <p class="lead muted">Framework mã nguồn mở của Microsoft, dùng để tự động hóa trình duyệt và chạy bộ test End-to-End trên website quản trị.</p>
+        <p class="muted" style="margin-top:28px">Ngôn ngữ: Python · Engine: Chromium · Giấy phép: Apache 2.0</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Nội dung</p>
+        <h2>Các phần trình bày</h2>
+        <div class="grid grid-2">
+          <div class="card"><h3>1. Playwright là gì</h3><p>Định nghĩa, ba engine trình duyệt, giấy phép.</p></div>
+          <div class="card"><h3>2. Dùng để làm gì</h3><p>E2E, form, phân quyền, API, CI/CD — gắn với Sport Shop.</p></div>
+          <div class="card"><h3>3. Nguyên lý hoạt động</h3><p>Browser, BrowserContext, Locator, Pass/Fail, báo cáo.</p></div>
+          <div class="card"><h3>4. Tính năng nổi bật</h3><p>Auto-waiting, Codegen, isolation, screenshot, API testing.</p></div>
+          <div class="card"><h3>5. Ngôn ngữ hỗ trợ</h3><p>Vì sao Sport Shop chọn Python thay vì TypeScript/Java.</p></div>
+          <div class="card"><h3>6. Áp dụng trong bài</h3><p>Kiến trúc thư mục, Excel 274 case, 3 phiên trình duyệt.</p></div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Định nghĩa</p>
+        <h2>Playwright là gì?</h2>
+        <p>Playwright là framework mã nguồn mở do Microsoft phát triển, dùng để tự động hóa trình duyệt và kiểm thử ứng dụng web hiện đại.</p>
+        <p>Viết một bộ mã, chạy trên ba engine:</p>
+        <div class="grid grid-3" style="margin-top:18px">
+          <div class="card stat"><b>Chromium</b><p>Nền tảng của Chrome và Edge. Sport Shop đang chạy trên engine này.</p></div>
+          <div class="card"><h3>Firefox</h3><p>Engine độc lập, dùng khi cần kiểm tra tương thích Mozilla.</p></div>
+          <div class="card"><h3>WebKit</h3><p>Engine của Safari, dùng khi cần kiểm tra trên hệ sinh thái Apple.</p></div>
+        </div>
+        <p class="note">Playwright Test (TypeScript) có sẵn test runner, assertion, chạy song song, HTML Report và Trace Viewer. Bộ Sport Shop dùng API Python <code>playwright.sync_api</code> vì cần đọc/ghi Excel và gọi fixture PHP.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Mục đích</p>
+        <h2>Playwright dùng để làm gì?</h2>
+        <div class="grid grid-2">
+          <div>
+            <ul>
+              <li>Kiểm thử giao diện website</li>
+              <li>Kiểm thử End-to-End (E2E)</li>
+              <li>Đăng nhập, đăng ký, phân quyền</li>
+              <li>Thêm, sửa, xóa, tìm kiếm dữ liệu</li>
+              <li>Form và validation</li>
+              <li>Tải tệp, tải ảnh</li>
+              <li>Kiểm thử API</li>
+              <li>Nhiều trình duyệt, giả lập mobile</li>
+              <li>Chụp ảnh, quay video, chạy trên CI/CD</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Trên Sport Shop đã kiểm thử</h3>
+            <ul>
+              <li>Đăng nhập quản trị viên</li>
+              <li>Quản lý người dùng — 64 case</li>
+              <li>Quản lý sản phẩm — 54 case</li>
+              <li>Quản lý đánh giá — 32 case</li>
+              <li>Dashboard / báo cáo doanh thu — 24 case</li>
+              <li>Đăng ký thành viên — 100 case</li>
+              <li>Phân quyền ADMIN và USER</li>
+              <li>Thanh toán QR khi xóa user (case 60)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Quy trình</p>
+        <h2>Nguyên lý hoạt động</h2>
+        <div class="flow" style="margin: 8px 0 24px">
+          <span class="pill">1. Khởi động browser</span><span class="arrow">→</span>
+          <span class="pill">2. BrowserContext</span><span class="arrow">→</span>
+          <span class="pill">3. Mở trang</span><span class="arrow">→</span>
+          <span class="pill">4. Locator</span><span class="arrow">→</span>
+          <span class="pill">5. Thao tác</span><span class="arrow">→</span>
+          <span class="pill">6. So sánh</span><span class="arrow">→</span>
+          <span class="pill">7. Pass / Fail</span><span class="arrow">→</span>
+          <span class="pill">8. Báo cáo</span>
+        </div>
+        <div class="card">
+          <h3>BrowserContext = một phiên trình duyệt riêng</h3>
+          <p>Cookie, tài khoản đăng nhập và dữ liệu giữa các phiên không ảnh hưởng lẫn nhau. Sport Shop tạo 3 context cùng lúc: <b>guest</b> (chưa login), <b>user</b> (khách hàng), <b>admin</b> (quản trị).</p>
+        </div>
+        <pre style="margin-top:16px">browser = p.chromium.launch(headless=HEADLESS)
+guest_ctx = browser.new_context(locale="vi-VN", viewport={"width": 1366, "height": 768})
+user_ctx  = browser.new_context(locale="vi-VN", viewport={"width": 1366, "height": 768})
+admin_ctx = browser.new_context(locale="vi-VN", viewport={"width": 1366, "height": 768})</pre>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Tính năng</p>
+        <h2>Những tính năng nổi bật</h2>
+        <table>
+          <thead><tr><th>Tính năng</th><th>Ý nghĩa</th><th>Trong Sport Shop</th></tr></thead>
+          <tbody>
+            <tr><td>Cross-browser</td><td>Cùng một test trên Chromium, Firefox, WebKit</td><td>Hiện chạy Chromium (<code>TESTER = "Playwright (Chromium)"</code>)</td></tr>
+            <tr><td>Auto-waiting</td><td>Tự chờ phần tử sẵn sàng trước khi thao tác</td><td><code>wait_for_selector("#adminUsername")</code> rồi mới <code>fill()</code></td></tr>
+            <tr><td>Locator</td><td>Tìm theo role, label, text, CSS, test ID</td><td><code>page.locator(".admin-user-table tbody tr", has_text="@username")</code></td></tr>
+            <tr><td>Web-first assertions</td><td>Tự thử lại assertion trong khoảng thời gian</td><td>Bộ Python tự so sánh rồi ghi Pass/Fail vào Excel</td></tr>
+            <tr><td>Test isolation</td><td>Mỗi phiên độc lập</td><td>3 context + fixture PHP <code>cleanup</code> xóa user <code>e2e_*</code></td></tr>
+            <tr><td>Screenshot / Video / Trace</td><td>Ghi lại quá trình khi Fail</td><td><code>page.screenshot(full_page=True)</code> từng case</td></tr>
+            <tr><td>API testing</td><td>Gửi request, kiểm tra response</td><td><code>page.request.fetch()</code> kiểm tra HTTP 405, CSRF, upload ảnh</td></tr>
+            <tr><td>Mobile emulation</td><td>Giả lập thiết bị di động</td><td>Chưa dùng; viewport cố định 1366×768</td></tr>
+            <tr><td>Codegen</td><td>Ghi thao tác, sinh mã</td><td>Dùng khi soạn locator, sau đó chuẩn hóa tay</td></tr>
+            <tr><td>HTML Report</td><td>Báo cáo Pass/Fail trên web</td><td>Bài này xuất Excel <code>ketqua_*.xlsx</code> đúng cột H, I, J</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Auto-waiting</p>
+        <h2>Tự chờ trước khi thao tác</h2>
+        <p>Trước khi nhấn nút, Playwright kiểm tra phần tử: tồn tại, hiển thị, được bật, ổn định, nhận sự kiện chuột.</p>
+        <p>Người viết test ít phải dùng <code>waitForTimeout()</code> thủ công — hạn chế test lúc Pass lúc Fail.</p>
+        <pre style="margin-top:18px">def login_admin(page, username, password):
+    goto(page, "admin-auth/login")
+    page.wait_for_selector("#adminUsername")   # chờ ô nhập hiện
+    page.fill("#adminUsername", username)
+    page.fill("#adminPassword", password)
+    page.click("button.admin-login-submit")    # click khi nút sẵn sàng
+    return "admin-dashboard" in page.url</pre>
+        <p class="note">File: <code>tests/e2e/pw_common.py</code>. Lệnh <code>wait_for_timeout(400)</code> chỉ dùng thêm sau khi trang tải xong, không thay thế auto-waiting.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Codegen</p>
+        <h2>Ghi thao tác và sinh mã</h2>
+        <pre>npx playwright codegen http://localhost/SportShop</pre>
+        <p style="margin-top:16px">Sau khi chạy lệnh, thao tác trực tiếp trên website. Playwright tạo <code>click()</code>, <code>fill()</code> và assertion tương ứng.</p>
+        <div class="card" style="margin-top:16px">
+          <h3>Lưu ý khi thuyết trình</h3>
+          <p>Mã Codegen chỉ là bản nháp. Bộ Sport Shop không chạy nguyên mã sinh ra, mà chuẩn hóa thành helper: <code>goto</code>, <code>login_admin</code>, <code>confirm</code>, <code>SheetRun.check</code> — để 64 case dùng chung một cách viết.</p>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Ngôn ngữ</p>
+        <h2>Playwright hỗ trợ nhiều ngôn ngữ</h2>
+        <div class="grid grid-2">
+          <div>
+            <ul>
+              <li>JavaScript</li>
+              <li>TypeScript — thuận tiện nhất với Playwright Test</li>
+              <li>Python — lựa chọn của Sport Shop</li>
+              <li>Java + JUnit / TestNG</li>
+              <li>.NET / C#</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Vì sao bài này dùng Python?</h3>
+            <p>Website viết PHP MVC, không phải Spring Boot. Bộ test cần:</p>
+            <ul>
+              <li>Đọc Excel gốc bằng openpyxl</li>
+              <li>Gọi fixture PHP để tạo user/sản phẩm</li>
+              <li>Ghi Pass/Fail đúng từng dòng Excel</li>
+            </ul>
+            <p style="margin-top:10px">Python gắn được Playwright, Excel và subprocess PHP trong một thư mục <code>tests/e2e/</code>, không trộn vào mã nguồn cửa hàng.</p>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:16px">Thư viện: <code>playwright==1.55.0</code> và <code>openpyxl==3.1.5</code>.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Kiến trúc bài</p>
+        <h2>Luồng dữ liệu bộ kiểm thử Sport Shop</h2>
+        <div class="flow" style="margin-bottom:20px">
+          <span class="pill">Excel gốc</span><span class="arrow">→</span>
+          <span class="pill">catalog.py</span><span class="arrow">→</span>
+          <span class="pill">sheet_*.py</span><span class="arrow">→</span>
+          <span class="pill">pw_common.py</span><span class="arrow">→</span>
+          <span class="pill">ketqua.xlsx + ảnh PNG</span>
+        </div>
+        <table>
+          <thead><tr><th>Tầng</th><th>File</th><th>Vai trò</th></tr></thead>
+          <tbody>
+            <tr><td>Đầu vào</td><td><code>catalog.py</code></td><td>Đọc 5 sheet Excel: ID, bước, test data, expected. Không ghi đè file gốc.</td></tr>
+            <tr><td>Điều phối</td><td><code>playwright_qlcuahang.py</code></td><td>Mở Chromium, tạo 3 context, gọi từng sheet.</td></tr>
+            <tr><td>Kịch bản</td><td><code>sheet_nguoidung.py</code> …</td><td>Thao tác trình duyệt đúng từng case Excel.</td></tr>
+            <tr><td>Fixture</td><td><code>fixtures.php</code></td><td>Tạo/xóa dữ liệu <code>e2e_*</code> trong MySQL qua JSON stdin.</td></tr>
+            <tr><td>Đầu ra</td><td><code>write_excel()</code> + <code>Shotter</code></td><td>Cột H Actual, I Pass/Fail, J Date + screenshot full page.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Phạm vi</p>
+        <h2>Bộ case theo module quản trị</h2>
+        <div class="grid grid-3">
+          <div class="card stat"><b>100</b><p>register — form đăng ký, CSRF, validation</p></div>
+          <div class="card stat"><b>64</b><p>nguoidung — tìm, sửa, khóa, xóa, phân quyền</p></div>
+          <div class="card stat"><b>54</b><p>qlsanpham — CRUD, ảnh JPG/PNG/WEBP, ẩn/đóng</p></div>
+          <div class="card stat"><b>32</b><p>danhgiasnp — lọc sao, phản hồi, XSS, xóa</p></div>
+          <div class="card stat"><b>24</b><p>Dashboard — đối chiếu số liệu UI với DB</p></div>
+          <div class="card stat"><b>274</b><p>Tổng case đọc từ Excel qlcuahang</p></div>
+        </div>
+        <p class="note">Runner hiện tại <code>RUN_SHEETS = ("nguoidung",)</code> — demo thuyết trình nên chạy sheet 64 case. Các sheet còn lại đã có file <code>sheet_*.py</code> sẵn.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Ví dụ code</p>
+        <h2>Phân quyền ADMIN và USER</h2>
+        <p>Case 1–3 sheet người dùng: khách chưa login và tài khoản USER không được vào trang quản trị.</p>
+        <pre>goto(guest, "admin-user/index")
+s.check(1, "admin-auth/login" in guest.url, f"url={guest.url}", page=guest)
+
+login_user(user, info["customer"]["username"], info["customer"]["password"])
+goto(user, "admin-user/index")
+s.check(2, "admin-auth/login" in user.url, f"url={user.url}", page=user)
+
+goto(admin, "admin-user/index")
+s.check(3, has(admin, "Người dùng") and admin.locator("input[name=q]").count(),
+        f"url={admin.url}")</pre>
+        <p class="note">Ba thao tác chạy trên ba Page khác nhau. Cookie ADMIN không lẫn cookie USER — đúng nguyên lý BrowserContext.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Ví dụ code</p>
+        <h2>Thao tác giống người dùng + kiểm tra API</h2>
+        <div class="grid grid-2">
+          <div>
+            <h3 style="margin-top:0">Giao diện</h3>
+            <pre>admin.fill("input[name=full_name]", "AUTOTEST Updated Name")
+admin.fill("input[name=email]", f"{username}.new@example.com")
+admin.select_option("select[name=status_user]", "Closed")
+admin.click("button:has-text('Lưu thay đổi')")</pre>
+          </div>
+          <div>
+            <h3 style="margin-top:0">HTTP / CSRF</h3>
+            <pre>code = status_of(admin, "POST", "admin-user/index", form={"a": "1"})
+s.check(4, code == 405, f"HTTP {code}")
+
+fetch(admin, "POST", f"admin-user/edit/{fid}",
+      form={"csrf_token": "fake", "full_name": "HACK"})</pre>
+          </div>
+        </div>
+        <p class="note">Playwright vừa điều khiển UI vừa gửi request (<code>page.request.fetch</code>) để kiểm tra method sai, CSRF giả, upload ảnh — không cần Postman riêng.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Đầu ra</p>
+        <h2>Ghi nhận Pass / Fail và bằng chứng</h2>
+        <pre>def check(self, cid, ok, actual, page=None):
+    shot = self.shots.take(shot_page, f"{self.sheet}_{cid}")
+    status = "Pass" if ok else "Fail"
+    self.results.append({..., "actual": actual, "status": status, "screenshot": shot})</pre>
+        <ul style="margin-top:16px">
+          <li>Excel kết quả: copy file gốc, chỉ ghi cột H (Actual), I (<span class="ok">Pass</span> / <span class="fail">Fail</span>), J (Date)</li>
+          <li>Ảnh: <code>001_nguoidung_1.png</code> … full page, lưu trong Pictures</li>
+          <li>Crash: ghi <code>crash.txt</code>, các case chưa chạy được đánh dấu thiếu</li>
+        </ul>
+        <p class="note">Đường dẫn mặc định: <code>C:\Users\ADMIN\Pictures\testcase_qlcuahang\&lt;timestamp&gt;\</code></p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Thực hành</p>
+        <h2>Cách chạy bộ test</h2>
+        <p>Yêu cầu: Apache + MySQL XAMPP đang bật, website tại <code>http://localhost/SportShop</code>.</p>
+        <pre>$env:PYTHONIOENCODING = "utf-8"
+$py = "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\python.exe"
+cd c:\xampp\htdocs\SportShop
+& $py tests\e2e\playwright_qlcuahang.py
+
+# Hiện cửa sổ trình duyệt khi demo:
+$env:SPORTSHOP_HEADLESS = "0"</pre>
+        <p class="note">Chế độ mặc định là headless (chạy nền). Khi thuyết trình, bật <code>SPORTSHOP_HEADLESS=0</code> để giám khảo thấy Chromium tự đăng nhập, tìm kiếm, khóa tài khoản.</p>
+      </section>
+
+      <section class="slide">
+        <p class="kicker">Tóm tắt</p>
+        <h2>Kết luận</h2>
+        <ul>
+          <li>Playwright tự động hóa trình duyệt trên Chromium, Firefox, WebKit; giấy phép Apache 2.0.</li>
+          <li>Phù hợp kiểm thử E2E: đăng nhập, CRUD, form, phân quyền, API, ảnh chụp, CI/CD.</li>
+          <li>BrowserContext tách phiên; auto-waiting giảm test flaky; Locator thao tác giống người dùng.</li>
+          <li>Sport Shop đặt bộ Python riêng trong <code>tests/e2e/</code>, đọc Excel 274 case, xuất kết quả và screenshot.</li>
+          <li>Đã gắn với chức năng thật: admin login, người dùng, sản phẩm, đánh giá, dashboard, QR.</li>
+        </ul>
+        <p class="note">Tài liệu tham khảo: Playwright docs (Intro, Authentication, Auto-waiting, Codegen) · kho Microsoft Playwright · mã nguồn <code>tests/e2e/</code>.</p>
+      </section>
+
+      <section class="slide title-slide">
+        <p class="kicker">Hỏi đáp</p>
+        <h1>Cảm ơn thầy cô và các bạn</h1>
+        <p class="lead muted">Sẵn sàng demo chạy 64 case sheet Người dùng hoặc mở file Excel kết quả + ảnh chụp.</p>
+      </section>
+
+    </div>
+    <div class="bar">
+      <span id="pos">1 / 16</span>
+      <span>
+        <button type="button" id="prev">← Trước</button>
+        <button type="button" id="next">Sau →</button>
+      </span>
+      <span>Phím ← → · In thành PDF nếu cần nộp PowerPoint</span>
+    </div>
+  </div>
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    let i = 0;
+    const show = () => {
+      slides.forEach((s, n) => s.classList.toggle("active", n === i));
+      document.getElementById("pos").textContent = (i + 1) + " / " + slides.length;
+    };
+    const go = (d) => { i = Math.max(0, Math.min(slides.length - 1, i + d)); show(); };
+    document.getElementById("prev").onclick = () => go(-1);
+    document.getElementById("next").onclick = () => go(1);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(1); }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(-1); }
+      if (e.key === "Home") { i = 0; show(); }
+      if (e.key === "End") { i = slides.length - 1; show(); }
+    });
+    show();
+  </script>
+</body>
+</html>
