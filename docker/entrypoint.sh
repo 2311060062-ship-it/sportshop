@@ -2,11 +2,14 @@
 set -eu
 cd /var/www
 
+if [ -n "${MYSQL_ATTR_SSL_CA:-}" ] && [ ! -r "$MYSQL_ATTR_SSL_CA" ]; then
+    echo "MySQL CA path is not readable. Using the certificate bundled with the app." >&2
+    unset MYSQL_ATTR_SSL_CA
+fi
+if [ -z "${MYSQL_ATTR_SSL_CA:-}" ] && [ -r /var/www/docker/aiven-ca.pem ]; then
+    MYSQL_ATTR_SSL_CA=/var/www/docker/aiven-ca.pem
+fi
 if [ -n "${MYSQL_ATTR_SSL_CA:-}" ]; then
-    if [ ! -r "$MYSQL_ATTR_SSL_CA" ]; then
-        echo "Cannot read MySQL CA file. Check Render Secret Files and MYSQL_ATTR_SSL_CA." >&2
-        exit 1
-    fi
     mkdir -p /run/app-certificates
     cp "$MYSQL_ATTR_SSL_CA" /run/app-certificates/mysql-ca.pem
     chown www-data:www-data /run/app-certificates/mysql-ca.pem
