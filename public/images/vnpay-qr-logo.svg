@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="92" height="28" viewBox="0 0 92 28">
+  <text x="1" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#e51d35">VN</text>
+  <text x="28" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#0875b8">PAY</text>
+  <text x="68" y="15" font-family="Arial, sans-serif" font-size="7" font-weight="800" fill="#e51d35">QR</text>
+  <path d="M69 18h15" stroke="#0875b8" stroke-width="2"/>
+</svg>

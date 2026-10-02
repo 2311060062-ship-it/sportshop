@@ -1,0 +1,10 @@
+Options -MultiViews
+RewriteEngine On
+RewriteBase /SportShop/
+
+# Bỏ qua các file và thư mục tồn tại thực sự (public assets)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Chuyển tất cả request về index.php
+RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
