@@ -11,7 +11,7 @@ WORKDIR /var/www
 COPY . .
 COPY docker/nginx.conf /etc/nginx/templates/default.conf.template
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-app.ini
-COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY docker/entrypoint.sh /usr/local/bin/app-entrypoint
 
 RUN chmod 755 /usr/local/bin/app-entrypoint \

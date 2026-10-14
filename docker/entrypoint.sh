@@ -27,15 +27,11 @@ if [ "${RUN_SQL_IMPORT:-true}" = "true" ]; then
     su-exec www-data php docker/import-schema.php
 fi
 
+echo "Checking PHP-FPM..."
 php-fpm -t
+echo "Checking Nginx..."
 nginx -t
 
-php-fpm -F &
-pid_fpm=$!
-nginx -g 'daemon off;' &
-pid_nginx=$!
-
-trap 'kill -QUIT "$pid_fpm" "$pid_nginx" 2>/dev/null || true; wait "$pid_fpm" "$pid_nginx" 2>/dev/null || true' TERM INT
-wait -n "$pid_fpm" "$pid_nginx"
-echo "A web server exited; stopping container" >&2
-exit 1
+php-fpm -D
+echo "PHP-FPM started. Nginx is listening on port ${PORT}."
+exec nginx -g 'daemon off;'
