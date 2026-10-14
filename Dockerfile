@@ -14,7 +14,11 @@ COPY docker/php.ini /usr/local/etc/php/conf.d/zz-app.ini
 COPY docker/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY docker/entrypoint.sh /usr/local/bin/app-entrypoint
 
-RUN chmod 755 /usr/local/bin/app-entrypoint \
+RUN sed -i 's/\r$//' /usr/local/bin/app-entrypoint \
+        /etc/nginx/templates/default.conf.template \
+        /usr/local/etc/php-fpm.d/zz-docker.conf \
+        /usr/local/etc/php/conf.d/zz-app.ini \
+    && chmod 755 /usr/local/bin/app-entrypoint \
     && mkdir -p /run/nginx /var/www/storage \
     && chown -R www-data:www-data /var/www/storage
 

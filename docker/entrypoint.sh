@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eu
 cd /var/www
+echo "SportShop container starting."
 
 if [ -n "${MYSQL_ATTR_SSL_CA:-}" ] && [ ! -r "$MYSQL_ATTR_SSL_CA" ]; then
     echo "MySQL CA path is not readable. Using the certificate bundled with the app." >&2
@@ -32,6 +33,15 @@ php-fpm -t
 echo "Checking Nginx..."
 nginx -t
 
-php-fpm -D
-echo "PHP-FPM started. Nginx is listening on port ${PORT}."
-exec nginx -g 'daemon off;'
+echo "Starting web server on port ${PORT}."
+php-fpm -F &
+fpm_pid=$!
+nginx -g 'daemon off;' &
+nginx_pid=$!
+
+trap 'kill -QUIT "$fpm_pid" "$nginx_pid" 2>/dev/null || true' TERM INT
+set +e
+wait -n "$fpm_pid" "$nginx_pid"
+status=$?
+echo "Web server stopped with status ${status}." >&2
+exit 1
